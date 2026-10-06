@@ -1,6 +1,6 @@
-# ⚡ TaskFlow Frontend
+# ⚡ TaskFlow - Gestión de Proyectos y Tareas
 
-Interfaz web moderna y de alto rendimiento para la gestión ágil de tareas personales y de equipo. Construida con **React 19**, **TypeScript**, **Vite** y estandarizada con **Tailwind CSS v4** y componentes accesibles.
+Interfaz web moderna y de alto rendimiento desarrollada como evaluación final del módulo para la administración ágil de proyectos y sus tareas correspondientes en entornos de equipo. Construida con **React 19**, **TypeScript**, **Vite** y estandarizada utilizando **Tailwind CSS v4** y componentes accesibles.
 
 ---
 
@@ -12,23 +12,23 @@ Interfaz web moderna y de alto rendimiento para la gestión ágil de tareas pers
   - Rutas públicas y rutas protegidas (`ProtectedRoute`).
   - Cierre de sesión seguro con limpieza de estado global.
 
-- **📋 Gestión Completa de Tareas (CRUD):**
-  - Creación rápida de tareas con título y descripción en modal interactivo.
-  - Edición en caliente de tareas existentes.
-  - Alternancia ágil de estado: pendiente ↔ completada.
-  - Eliminación permanente de tareas.
+- **📁 Gestión Completa de Proyectos (CRUD - Examen Final):**
+  - Creación rápida de proyectos mediante un panel lateral interactivo con validación de estados.
+  - Listado dinámico de proyectos asociados al usuario autenticado.
+  - Selección interactiva para conmutar el espacio de trabajo en tiempo real.
+  - Eliminación lógica de proyectos de la base de datos.
+
+- **📋 Gestión Completa de Tareas por Proyecto (CRUD):**
+  - Creación de tareas vinculadas estrictamente a un proyecto activo.
+  - Edición en caliente del título y descripción de tareas existentes mediante modales.
+  - Alternancia ágil de estado mediante peticiones asíncronas hacia la API: pendiente ↔ completada.
+  - Eliminación permanente de tareas de forma individual.
 
 - **📊 Métricas & Feedback Visual en Tiempo Real:**
-  - Tarjetas de resumen en vivo: *Total de tareas*, *Completadas* y *Pendientes*.
+  - Tarjetas de resumen automatizadas en el panel superior: *Total de tareas*, *Completadas* y *Pendientes* calculadas dinámicamente por proyecto.
   - Notificaciones enriquecidas (*toasts*) con Sonner para cada acción del usuario.
-  - Indicadores de carga mediante esqueletos animados (*Skeletons*).
-  - Manejo integral de estados vacíos (*Empty state*) y estados de error con opción de reintento.
-
-- **🎨 Diseño & Experiencia de Usuario (UX/UI):**
-  - Interfaz oscura premium (*Dark Theme*) optimizada para desarrolladores.
-  - Tipografía variable moderna (Geist).
-  - Efectos visuales de desenfoque (*backdrop-blur*), bordes suaves y transiciones fluidas.
-  - Totalmente adaptable a dispositivos móviles, tablets y escritorios.
+  - Indicadores de carga mediante estructuras estructuradas animadas (*Skeletons*).
+  - Manejo integral de estados vacíos (*Empty state*) y estados de error con opción de reintento manual.
 
 ---
 
@@ -56,19 +56,20 @@ src/
 │   ├── common/         # Componentes comunes (p. ej. ProtectedRoute)
 │   ├── tasks/          # Componentes de tareas (TaskItem, TaskForm, TaskSkeleton)
 │   └── ui/             # Primitivas de diseño (Button, Card, Dialog, Input, etc.)
-├── context/            # Contexto global de la aplicación (AuthContext, AuthProvider)
-├── hooks/              # Custom hooks (useAuth, useTasks)
+├── context/            # Contexto global de la aplicación (AuthContext, ProjectContext)
+├── hooks/              # Custom hooks (useAuth, useProjects)
 ├── layouts/            # Estructuras de página compartidas (MainLayout)
 ├── lib/                # Utilidades generales y constantes globales
 ├── pages/              # Vistas principales de la aplicación
 │   ├── LandingPage.tsx   # Página de inicio con hero y características
 │   ├── LoginPage.tsx     # Formulario de inicio de sesión
 │   ├── RegisterPage.tsx  # Formulario de registro de usuarios
-│   └── DashboardPage.tsx # Panel privado con métricas y lista de tareas
+│   └── DashboardPage.tsx # Panel privado con métricas, barra de proyectos y lista de tareas
 ├── services/           # Capa de consumo de API REST
 │   ├── api.ts            # Cliente fetch centralizado con inyección de JWT
 │   ├── auth.service.ts   # Peticiones de autenticación
-│   └── task.service.ts   # Peticiones CRUD de tareas
+│   ├── project.service.ts# Peticiones CRUD de proyectos (Examen Final)
+│   └── task.service.ts   # Peticiones CRUD de tareas por proyecto
 ├── App.tsx             # Configuración de rutas y providers globales
 └── main.tsx            # Punto de entrada de la aplicación
 ```
@@ -133,23 +134,30 @@ npm run lint
 
 ## 🔗 Endpoints Consumidos (Backend)
 
-La aplicación espera comunicarse con un backend que exponga los siguientes endpoints bajo `VITE_API_URL`:
+La aplicación se comunica con la API proporcionada (`project-task-flow-api`) bajo los siguientes endpoints:
 
 - **Autenticación:**
   - `POST /auth/register` - Registro de usuario (`name`, `email`, `password`).
   - `POST /auth/login` - Inicio de sesión (`email`, `password`) -> devuelve token JWT.
   - `GET /auth/me` - Perfil del usuario autenticado con cabecera `Authorization: Bearer <token>`.
 
+- **Proyectos:**
+  - `GET /projects` - Obtener lista de proyectos del usuario autenticado.
+  - `POST /projects` - Crear un proyecto (`name`, `description`).
+  - `PUT /projects/:id` - Actualizar nombre o descripción de un proyecto.
+  - `DELETE /projects/:id` - Eliminar proyecto.
+  - `GET /projects/:id` - Obtener el detalle de un proyecto específico junto con sus tareas vinculadas.
+
 - **Tareas:**
-  - `GET /tasks` - Obtener lista de tareas del usuario autenticado.
-  - `POST /tasks` - Crear una tarea (`title`, `description`).
-  - `PUT /tasks/:id` - Actualizar título o descripción de una tarea existente.
-  - `PATCH /tasks/:id/complete` - Marcar tarea como completada.
-  - `PATCH /tasks/:id/pending` - Marcar tarea como pendiente.
-  - `DELETE /tasks/:id` - Eliminar tarea.
+  - `GET /tasks/:projectId` - Obtener lista de tareas vinculadas al proyecto.
+  - `POST /tasks/:projectId` - Crear una tarea dentro de un proyecto (`title`, `description`).
+  - `PATCH /tasks/:projectId` - Actualizar una tarea enviando el `id` en el cuerpo.
+  - `PATCH /tasks/:projectId/complete` - Marcar tarea como completada.
+  - `PATCH /tasks/:projectId/pending` - Marcar tarea como pendiente.
+  - `DELETE /tasks/:projectId` - Eliminar tarea enviando el `id` en el cuerpo.
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está distribuido bajo licencia privada o para fines educativos y de demostración técnica.
+Este proyecto está distribuido bajo licencia privada con fines académicos y de evaluación técnica para el módulo de React.

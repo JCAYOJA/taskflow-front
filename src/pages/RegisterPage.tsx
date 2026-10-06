@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { User, Mail, Lock, UserPlus, AlertCircle, Loader2 } from 'lucide-react';
 
-function RegisterPage() {
+export default function RegisterPage() { // <-- Cambiado a exportación directa por defecto para alinearse con App.tsx
   const navigate = useNavigate();
   const { register } = useAuth();
   const [formData, setFormData] = useState({
@@ -35,7 +35,7 @@ function RegisterPage() {
     if (error) setError(null);
   };
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => { // <-- Tipo corregido aquí
     e.preventDefault();
     setError(null);
     const { name, email, password, confirmPassword } = formData;
@@ -206,5 +206,3 @@ function RegisterPage() {
     </div>
   );
 }
-
-export default RegisterPage;

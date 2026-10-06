@@ -4,10 +4,11 @@
  */
 
 // Nombre público de la aplicación
-export const APP_NAME = import.meta.env.VITE_APP_NAME || 'TaskFlow';
+export const APP_NAME = 'TaskFlow';
 
 // Clave utilizada para almacenar el token JWT en el LocalStorage
-export const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY || 'taskflow_token';
+export const TOKEN_KEY = 'taskflow_token';
 
-// URL base del backend
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// URL base del backend corregida e introducida por completo
+export const API_URL = 'http://127.0.0.1:3000';
+ 

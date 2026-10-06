@@ -1,42 +1,37 @@
 import { apiFetch, type ApiResponse } from './api';
 
-// 1. Modelo de datos de una Tarea
+// 1. Modelo de datos de una Tarea (Se exporta el tipo Task requerido por DashboardPage)
 export interface Task {
   id: string;
   title: string;
   description: string;
   completed: boolean;
+  projectId: string;
   createdAt?: string;
-  userId?: string;
 }
 
-// 2. Objetos de transferencia de datos (DTOs)
 export interface CreateTaskDTO {
   title: string;
   description: string;
 }
 
-export interface UpdateTaskDTO {
-  title?: string;
-  description?: string;
-}
-
 /**
- * Obtener todas las tareas del usuario autenticado
- * Endpoint: GET /tasks
+ * Obtener todas las tareas de un proyecto específico con paginación
+ * Endpoint: GET /tasks/:projectId
  */
-export async function getTasksRequest(): Promise<ApiResponse<Task[]>> {
-  return apiFetch<Task[]>('/tasks');
+export async function getTasksRequest(projectId: string, page = 1, limit = 10): Promise<ApiResponse<Task[]>> {
+  return apiFetch<Task[]>(`/tasks/${projectId}?page=${page}&limit=${limit}`);
 }
 
 /**
- * Crear una nueva tarea
- * Endpoint: POST /tasks
+ * Crear una nueva tarea vinculada a un proyecto
+ * Endpoint: POST /tasks/:projectId
  */
 export async function createTaskRequest(
+  projectId: string,
   taskData: CreateTaskDTO
 ): Promise<ApiResponse<Task>> {
-  return apiFetch<Task>('/tasks', {
+  return apiFetch<Task>(`/tasks/${projectId}`, {
     method: 'POST',
     body: JSON.stringify(taskData),
   });
@@ -44,50 +39,45 @@ export async function createTaskRequest(
 
 /**
  * Actualizar título y/o descripción de una tarea existente
- * Endpoint: PUT /tasks/:id
+ * Endpoint: PATCH /tasks/:projectId (El backend pide id en el body)
  */
 export async function updateTaskRequest(
-  id: string,
-  taskData: UpdateTaskDTO
+  projectId: string,
+  taskId: string,
+  taskData: CreateTaskDTO
 ): Promise<ApiResponse<Task>> {
-  return apiFetch<Task>(`/tasks/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(taskData),
-  });
-}
-
-/**
- * Alternar estado completado de una tarea
- * Endpoint: PATCH /tasks/:id/complete
- */
-export async function completeTaskRequest(
-  id: string
-): Promise<ApiResponse<Task>> {
-  return apiFetch<Task>(`/tasks/${id}/complete`, {
+  return apiFetch<Task>(`/tasks/${projectId}`, {
     method: 'PATCH',
+    body: JSON.stringify({ id: taskId, ...taskData }),
   });
 }
 
 /**
- * Eliminar una tarea permanentemente
- * Endpoint: DELETE /tasks/:id
+ * Cambiar el estado de la tarea alternando según su estado actual
+ * Endpoints: PATCH /tasks/:projectId/complete o /tasks/:projectId/pending
+ */
+export async function toggleTaskStatusRequest(
+  projectId: string,
+  taskId: string,
+  isCompleted: boolean
+): Promise<ApiResponse<Task>> {
+  const action = isCompleted ? 'pending' : 'complete';
+  return apiFetch<Task>(`/tasks/${projectId}/${action}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ id: taskId }),
+  });
+}
+
+/**
+ * Eliminar una tarea permanentemente enviando el id en el body
+ * Endpoint: DELETE /tasks/:projectId
  */
 export async function deleteTaskRequest(
-  id: string
+  projectId: string,
+  taskId: string
 ): Promise<ApiResponse<null>> {
-  return apiFetch<null>(`/tasks/${id}`, {
+  return apiFetch<null>(`/tasks/${projectId}`, {
     method: 'DELETE',
-  });
-}
-
-/**
- * Marcar una tarea como pendiente nuevamente
- * Endpoint: PATCH /tasks/:id/pending
- */
-export async function pendingTaskRequest(
-  id: string
-): Promise<ApiResponse<Task>> {
-  return apiFetch<Task>(`/tasks/${id}/pending`, {
-    method: 'PATCH',
+    body: JSON.stringify({ id: taskId }),
   });
 }

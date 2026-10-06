@@ -30,7 +30,7 @@ import {
 
 interface TaskItemProps {
   task: Task;
-  onToggle: (id: string) => Promise<unknown>;
+  onToggle: (task: Task) => Promise<unknown>; // Ajustado para recibir el objeto task completo según tu service
   onEdit: (task: Task) => void;
   onDelete: (id: string) => Promise<unknown>;
 }
@@ -58,7 +58,7 @@ export function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
   const handleToggle = async () => {
     try {
       setIsToggling(true);
-      await onToggle(task.id);
+      await onToggle(task);
     } catch (err) {
       console.error('Error al alternar estado de la tarea:', err);
     } finally {
@@ -239,10 +239,7 @@ export function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
                   <span>Eliminando...</span>
                 </>
               ) : (
-                <>
-                  <Trash2 className="h-4 w-4" />
-                  <span>Eliminar definitivamente</span>
-                </>
+                <span>Eliminar</span>
               )}
             </Button>
           </DialogFooter>

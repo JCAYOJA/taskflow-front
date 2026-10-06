@@ -1,4 +1,4 @@
-import { useState, type SubmitEvent } from 'react';
+import { useState } from 'react';
 import type { Task, CreateTaskDTO } from '@/services/task.service';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,10 +13,11 @@ import {
 import { AlertCircle, Loader2, PlusCircle, Pencil } from 'lucide-react';
 
 interface TaskFormProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  isOpen: boolean;       // Alineado con DashboardPage.tsx
+  onClose: () => void;   // Alineado con DashboardPage.tsx
   onSubmit: (data: CreateTaskDTO) => Promise<unknown>;
   initialData?: Task | null;
+  title?: string;
 }
 
 interface TaskFormContentProps {
@@ -47,8 +48,8 @@ function TaskFormContent({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Envío del formulario
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+  // Envío del formulario utilizando React.FormEvent estándar
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -138,7 +139,7 @@ function TaskFormContent({
           />
         </div>
 
-        {/* Botones de Acción con separación homogénea */}
+        {/* Botones de Acción */}
         <DialogFooter className="gap-3 pt-3 sm:gap-3">
           <Button
             type="button"
@@ -174,19 +175,19 @@ function TaskFormContent({
  * Encapsula el contenedor Dialog y delega el contenido a TaskFormContent con una clave única.
  */
 export function TaskForm({
-  open,
-  onOpenChange,
+  isOpen,
+  onClose,
   onSubmit,
   initialData,
 }: TaskFormProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="border-slate-800 bg-slate-900 text-slate-100 sm:max-w-md">
         <TaskFormContent
-          key={initialData ? initialData.id : open ? 'new-open' : 'closed'}
+          key={initialData ? initialData.id : isOpen ? 'new-open' : 'closed'}
           initialData={initialData}
           onSubmit={onSubmit}
-          onClose={() => onOpenChange(false)}
+          onClose={onClose}
         />
       </DialogContent>
     </Dialog>

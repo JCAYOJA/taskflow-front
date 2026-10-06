@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type SubmitEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Mail, Lock, LogIn, AlertCircle, Loader2 } from 'lucide-react';
 
-function LoginPage() {
+export default function LoginPage() { // <-- Cambiado a exportación directa por defecto para alinearse con App.tsx
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -37,8 +37,8 @@ function LoginPage() {
     if (error) setError(null);
   };
 
-  // Manejador del envío y autenticación real con la API
-  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
+  // Manejador del envío utilizando React.FormEvent estándar
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => { // <-- Tipo corregido aquí
     e.preventDefault();
     setError(null);
 
@@ -176,5 +176,3 @@ function LoginPage() {
     </div>
   );
 }
-
-export default LoginPage;
